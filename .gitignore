@@ -73,7 +73,9 @@ coverage.xml
 *.cover
 
 #data
-data/*.csv
+data/link.csv
+data/movie.csv
+data/rating.csv
 
 # pytest
 .pytest_cache/
