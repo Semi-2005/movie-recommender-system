@@ -19,7 +19,7 @@ ML-based movie recommendation system using content-based and collaborative filte
 
 ### Backend
 pip install -r requirements.txt
-uvicorn app.main:app --reload
+uvicorn backend.app.main:app --reload
 
 ## Data 
 movie_features.csv is generated from raw MovieLens datasets using notebooks/eda.ipynb
