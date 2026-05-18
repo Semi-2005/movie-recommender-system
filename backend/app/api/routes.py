@@ -1,0 +1,78 @@
+
+
+from fastapi import APIRouter, Query
+
+from backend.app.services.recommender import (
+    get_recommendations,
+    search_movies,
+    get_model_stats,
+    health_check
+)
+
+router = APIRouter()
+
+
+@router.get("/")
+def home():
+    """
+    Root endpoint.
+    """
+    return {
+        "message": "Movie Recommendation API is running"
+    }
+
+
+@router.get("/recommend")
+def recommend_movie(
+    movie: str = Query(..., description="Movie title"),
+    top_n: int = Query(10, ge=1, le=50)
+):
+    """
+    Return movie recommendations based on similarity.
+    """
+    recommendations = get_recommendations(movie, top_n)
+
+    if not recommendations:
+        return {
+            "message": "Movie not found",
+            "recommendations": []
+        }
+
+    return {
+        "input_movie": movie,
+        "total_recommendations": len(recommendations),
+        "recommendations": recommendations
+    }
+
+
+@router.get("/search")
+def search_movie(
+    q: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=50)
+):
+    """
+    Search movie titles.
+    """
+    results = search_movies(q, limit)
+
+    return {
+        "query": q,
+        "results_count": len(results),
+        "results": results
+    }
+
+
+@router.get("/stats")
+def model_stats():
+    """
+    Return model statistics.
+    """
+    return get_model_stats()
+
+
+@router.get("/health")
+def health():
+    """
+    Health check endpoint.
+    """
+    return health_check()
