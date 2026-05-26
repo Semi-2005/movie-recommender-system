@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.metrics.pairwise import linear_kernel
 
 
 class ContentBasedRecommender:
@@ -15,7 +15,6 @@ class ContentBasedRecommender:
         self.df = None
         self.tfidf = None
         self.tfidf_matrix = None
-        self.cosine_sim = None
         self._initialize_model()
 
     def _initialize_model(self):
@@ -23,7 +22,6 @@ class ContentBasedRecommender:
         self.df = self._load_data()
         self.df = self._preprocess_data(self.df)
         self._build_tfidf_matrix()
-        self._build_similarity_matrix()
 
     def _load_data(self):
         """Load processed CSV dataset."""
@@ -58,13 +56,6 @@ class ContentBasedRecommender:
 
         self.tfidf_matrix = self.tfidf.fit_transform(self.df["genres"])
 
-    def _build_similarity_matrix(self):
-        """Create cosine similarity matrix."""
-        self.cosine_sim = cosine_similarity(
-            self.tfidf_matrix,
-            self.tfidf_matrix
-        )
-
     def recommend(self, movie_name, top_n=10):
         """
         Recommend similar movies.
@@ -85,7 +76,15 @@ class ContentBasedRecommender:
 
         movie_index = matches.index[0]
 
-        similarity_scores = list(enumerate(self.cosine_sim[movie_index]))
+        movie_vector = self.tfidf_matrix[movie_index]
+
+        similarity_scores = linear_kernel(
+            movie_vector,
+            self.tfidf_matrix
+        ).flatten()
+
+        similarity_scores = list(enumerate(similarity_scores))
+
         similarity_scores = sorted(
             similarity_scores,
             key=lambda item: item[1],
@@ -116,7 +115,7 @@ class ContentBasedRecommender:
         return {
             "movie_count": int(len(self.df)),
             "feature_count": int(len(self.tfidf.get_feature_names_out())),
-            "matrix_shape": tuple(self.tfidf_matrix.shape),
+            "tfidf_matrix_shape": tuple(self.tfidf_matrix.shape),
         }
 
 
