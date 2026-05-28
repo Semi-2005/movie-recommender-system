@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pandas as pd
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import linear_kernel
 
@@ -21,6 +22,7 @@ class ContentBasedRecommender:
         """Load data and build model artifacts."""
         self.df = self._load_data()
         self.df = self._preprocess_data(self.df)
+        self.df = self._build_ranking_features(self.df)
         self._build_tfidf_matrix()
 
     def _load_data(self):
@@ -43,6 +45,35 @@ class ContentBasedRecommender:
         df["genres"] = df["genres"].str.replace("|", " ", regex=False)
         df["genres"] = df["genres"].replace("(no genres listed)", "")
         df["genres"] = df["genres"].str.lower().str.strip()
+
+        return df
+
+    def _build_ranking_features(self, df):
+        """
+        Create normalized ranking features used for
+        popularity-aware recommendation scoring.
+        """
+        df = df.copy()
+
+        # Normalize movie ratings
+        rating_min = df["rating"].min()
+        rating_max = df["rating"].max()
+
+        df["normalized_rating"] = (
+            (df["rating"] - rating_min)
+            / (rating_max - rating_min)
+        )
+
+        # Log-scale rating counts to reduce popularity dominance
+        df["log_rating_count"] = np.log1p(df["rating_count"])
+
+        popularity_min = df["log_rating_count"].min()
+        popularity_max = df["log_rating_count"].max()
+
+        df["normalized_popularity"] = (
+            (df["log_rating_count"] - popularity_min)
+            / (popularity_max - popularity_min)
+        )
 
         return df
 
@@ -85,22 +116,37 @@ class ContentBasedRecommender:
 
         similarity_scores = list(enumerate(similarity_scores))
 
-        similarity_scores = sorted(
-            similarity_scores,
-            key=lambda item: item[1],
+        ranking_data = []
+
+        for movie_idx, similarity_score in similarity_scores:
+            if movie_idx == movie_index:
+                continue
+
+            movie = self.df.iloc[movie_idx]
+
+            final_score = (
+                (0.70 * similarity_score)
+                + (0.20 * movie["normalized_rating"])
+                + (0.10 * movie["normalized_popularity"])
+            )
+
+            ranking_data.append({
+                "movie_index": movie_idx,
+                "title": movie["title"],
+                "genres": movie["genres"],
+                "rating": round(movie["rating"], 2),
+                "rating_count": int(movie["rating_count"]),
+                "similarity_score": round(float(similarity_score), 3),
+                "final_score": round(float(final_score), 3)
+            })
+
+        ranking_data = sorted(
+            ranking_data,
+            key=lambda item: item["final_score"],
             reverse=True
         )
 
-        similarity_scores = similarity_scores[1: top_n + 1]
-        movie_indices = [item[0] for item in similarity_scores]
-
-        recommendations = self.df.iloc[movie_indices][["title", "genres"]].copy()
-
-        recommendations["similarity_score"] = [
-            round(item[1], 3) for item in similarity_scores
-        ]
-
-        return recommendations.to_dict(orient="records")
+        return ranking_data[:top_n]
 
     def search(self, query, limit=10):
         """Search movie titles."""
@@ -116,6 +162,8 @@ class ContentBasedRecommender:
             "movie_count": int(len(self.df)),
             "feature_count": int(len(self.tfidf.get_feature_names_out())),
             "tfidf_matrix_shape": tuple(self.tfidf_matrix.shape),
+            "ranking_system": "popularity-aware",
+            "similarity_strategy": "on-demand linear kernel",
         }
 
 
