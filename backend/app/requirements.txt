@@ -1,7 +1,19 @@
-##Project Requirments
+## Project Requirements
+
+# ── Web Framework ─────────────────────────────────────────────────────────────
 fastapi
 uvicorn
+
+# ── Data & ML ─────────────────────────────────────────────────────────────────
 pandas
 numpy
 scikit-learn
 rapidfuzz
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+# pytest        : Core test framework (replaces ad-hoc print() scripts)
+# httpx2        : Required by FastAPI's TestClient (httpx2 is the modern successor)
+# pytest-asyncio : Enables async test support if async endpoints are added later
+pytest
+httpx2
+pytest-asyncio
