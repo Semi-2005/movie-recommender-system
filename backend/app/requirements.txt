@@ -4,3 +4,4 @@ uvicorn
 pandas
 numpy
 scikit-learn
+rapidfuzz
