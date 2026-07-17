@@ -58,18 +58,20 @@ def recommend_collaborative(
     Uses the pre-computed cosine-similarity matrix built from user
     rating patterns.  Accepts a numeric ``movie_id`` (not a title string).
     """
-    recommendations = get_collaborative_recommendations(movie_id, top_n)
+    result = get_collaborative_recommendations(movie_id, top_n)
 
-    if not recommendations:
+    if result is None:
         return {
             "message": "Movie ID not found in collaborative model",
-            "recommendations": []
+            "input_movie_id": movie_id,
+            "recommendations": [],
         }
 
     return {
-        "input_movie_id": movie_id,
-        "total_recommendations": len(recommendations),
-        "recommendations": recommendations
+        "input_movie": result["input_movie"],
+        "input_movie_id": result["input_movie_id"],
+        "total_recommendations": len(result["recommendations"]),
+        "recommendations": result["recommendations"],
     }
 
 

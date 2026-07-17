@@ -111,6 +111,24 @@ class CollaborativeRecommender:
         )
 
     # ------------------------------------------------------------------
+    # Title Resolution
+    # ------------------------------------------------------------------
+
+    def resolve_movie_title(self, movie_id: int) -> str:
+        """
+        Resolve a ``movieId`` to its human-readable title.
+
+        Falls back to ``"Unknown (movieId=<id>)"`` when metadata is
+        unavailable so callers always receive a usable string.
+        """
+        if (
+            self.movie_metadata is not None
+            and movie_id in self.movie_metadata.index
+        ):
+            return str(self.movie_metadata.loc[movie_id, "title"])
+        return f"Unknown (movieId={movie_id})"
+
+    # ------------------------------------------------------------------
     # Recommendation Logic
     # ------------------------------------------------------------------
 
@@ -118,7 +136,7 @@ class CollaborativeRecommender:
         self,
         movie_id: int,
         top_n: int = 10,
-    ) -> list[dict]:
+    ) -> dict:
         """
         Return the top-N most similar movies for a given ``movieId``.
 
@@ -126,21 +144,26 @@ class CollaborativeRecommender:
             1. Map ``movie_id`` → matrix row index.
             2. Retrieve the similarity vector for that row.
             3. ``np.argsort`` descending, skip self, take top N.
-            4. Enrich each result with metadata from ``movie_features.csv``
-               (title, genres, rating, rating_count) when available.
+            4. Resolve each neighbour's ``movieId`` to its title via
+               ``movie_features.csv`` and enrich with metadata.
 
         Args:
             movie_id: The integer movie ID to find neighbors for.
             top_n:    Maximum number of similar movies to return.
 
         Returns:
-            A list of dicts ordered by ``similarity_score`` (descending),
-            each containing: ``movieId``, ``similarity_score``, and
-            optionally ``title``, ``genres``, ``rating``, ``rating_count``.
-            Returns an empty list when ``movie_id`` is unknown.
+            A dict with:
+            - ``input_movie``  — title of the queried movie.
+            - ``input_movie_id`` — the original movieId.
+            - ``recommendations`` — list of dicts ordered by
+              ``similarity_score`` (descending), each containing:
+              ``title``, ``movieId``, ``similarity_score``, and
+              optionally ``genres``, ``rating``, ``rating_count``.
+
+            Returns ``None`` when ``movie_id`` is unknown.
         """
         if movie_id not in self.movie_id_to_idx:
-            return []
+            return None
 
         idx = self.movie_id_to_idx[movie_id]
         similarity_vector = self.similarity_matrix[idx]
@@ -149,9 +172,9 @@ class CollaborativeRecommender:
         # will be at position 0 (similarity = 1.0), so we skip it.
         sorted_indices = np.argsort(similarity_vector)[::-1]
 
-        results: list[dict] = []
+        recommendations: list[dict] = []
         for neighbor_idx in sorted_indices:
-            if len(results) >= top_n:
+            if len(recommendations) >= top_n:
                 break
 
             neighbor_idx_int = int(neighbor_idx)
@@ -163,25 +186,30 @@ class CollaborativeRecommender:
             neighbor_movie_id = self.idx_to_movie_id[neighbor_idx_int]
             score = float(similarity_vector[neighbor_idx_int])
 
+            # Title-first entry: human-readable title is the primary key
             entry: dict = {
+                "title": self.resolve_movie_title(neighbor_movie_id),
                 "movieId": neighbor_movie_id,
                 "similarity_score": round(score, 4),
             }
 
-            # Enrich with metadata when available
+            # Enrich with additional metadata when available
             if (
                 self.movie_metadata is not None
                 and neighbor_movie_id in self.movie_metadata.index
             ):
                 meta = self.movie_metadata.loc[neighbor_movie_id]
-                entry["title"] = str(meta["title"])
                 entry["genres"] = str(meta["genres"])
                 entry["rating"] = round(float(meta["rating"]), 2)
                 entry["rating_count"] = int(meta["rating_count"])
 
-            results.append(entry)
+            recommendations.append(entry)
 
-        return results
+        return {
+            "input_movie": self.resolve_movie_title(movie_id),
+            "input_movie_id": movie_id,
+            "recommendations": recommendations,
+        }
 
     # ------------------------------------------------------------------
     # Model Statistics
