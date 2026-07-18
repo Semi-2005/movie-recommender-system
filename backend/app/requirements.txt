@@ -8,6 +8,8 @@ uvicorn
 pandas
 numpy
 scikit-learn
+scipy
+joblib
 rapidfuzz
 
 # ── Testing ───────────────────────────────────────────────────────────────────

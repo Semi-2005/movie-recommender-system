@@ -76,6 +76,8 @@ coverage.xml
 data/link.csv
 data/movie.csv
 data/rating.csv
+data/processed/collabrative_features.csv
+data/processed/collaborative_artifacts/
 
 # pytest
 .pytest_cache/

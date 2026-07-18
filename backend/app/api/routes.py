@@ -1,9 +1,11 @@
 
 
+
 from fastapi import APIRouter, Query
 
 from backend.app.services.recommender import (
     get_recommendations,
+    get_collaborative_recommendations,
     search_movies,
     get_model_stats,
     health_check
@@ -28,7 +30,7 @@ def recommend_movie(
     top_n: int = Query(10, ge=1, le=50)
 ):
     """
-    Return movie recommendations based on similarity.
+    Return movie recommendations based on content similarity.
     """
     recommendations = get_recommendations(movie, top_n)
 
@@ -42,6 +44,34 @@ def recommend_movie(
         "input_movie": movie,
         "total_recommendations": len(recommendations),
         "recommendations": recommendations
+    }
+
+
+@router.get("/recommend/collaborative")
+def recommend_collaborative(
+    movie_id: int = Query(..., description="Movie ID (integer)"),
+    top_n: int = Query(10, ge=1, le=50)
+):
+    """
+    Return similar movies using item-based collaborative filtering.
+
+    Uses the pre-computed cosine-similarity matrix built from user
+    rating patterns.  Accepts a numeric ``movie_id`` (not a title string).
+    """
+    result = get_collaborative_recommendations(movie_id, top_n)
+
+    if result is None:
+        return {
+            "message": "Movie ID not found in collaborative model",
+            "input_movie_id": movie_id,
+            "recommendations": [],
+        }
+
+    return {
+        "input_movie": result["input_movie"],
+        "input_movie_id": result["input_movie_id"],
+        "total_recommendations": len(result["recommendations"]),
+        "recommendations": result["recommendations"],
     }
 
 
