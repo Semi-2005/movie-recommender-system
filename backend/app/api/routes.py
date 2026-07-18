@@ -49,21 +49,23 @@ def recommend_movie(
 
 @router.get("/recommend/collaborative")
 def recommend_collaborative(
-    movie_id: int = Query(..., description="Movie ID (integer)"),
+    movie: str = Query(..., description="Movie title"),
     top_n: int = Query(10, ge=1, le=50)
 ):
     """
     Return similar movies using item-based collaborative filtering.
 
     Uses the pre-computed cosine-similarity matrix built from user
-    rating patterns.  Accepts a numeric ``movie_id`` (not a title string).
+    rating patterns.  Accepts a movie **title** (with fuzzy matching
+    support for typo tolerance).
     """
-    result = get_collaborative_recommendations(movie_id, top_n)
+    result = get_collaborative_recommendations(movie, top_n)
 
     if result is None:
         return {
-            "message": "Movie ID not found in collaborative model",
-            "input_movie_id": movie_id,
+            "message": "Movie not found in collaborative model. "
+                       "Check the title and try again, or use /search to find available movies.",
+            "input_movie": movie,
             "recommendations": [],
         }
 
