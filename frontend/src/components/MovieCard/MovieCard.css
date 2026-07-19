@@ -1,0 +1,204 @@
+.movie-card {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5) var(--space-6);
+  display: flex;
+  gap: var(--space-4);
+  transition:
+    border-color var(--transition-normal),
+    box-shadow var(--transition-normal),
+    transform var(--transition-normal),
+    background var(--transition-normal);
+  cursor: default;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  position: relative;
+  overflow: hidden;
+}
+
+.movie-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background: linear-gradient(135deg, rgba(124, 106, 247, 0.04) 0%, transparent 60%);
+  transition: opacity var(--transition-normal);
+  pointer-events: none;
+}
+
+.movie-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(124, 106, 247, 0.1);
+  transform: translateY(-2px);
+  background: var(--bg-surface-2);
+}
+
+.movie-card:hover::before {
+  opacity: 1;
+}
+
+/* ── Rank ─────────────────────────────────────────────────── */
+.movie-card__rank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2px;
+  min-width: 32px;
+  padding-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+}
+
+.movie-card__rank span {
+  font-size: 1rem;
+  color: var(--text-secondary);
+}
+
+/* ── Content ──────────────────────────────────────────────── */
+.movie-card__content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.movie-card__title {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.movie-card__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+/* ── Star Rating ──────────────────────────────────────────── */
+.star-rating {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.stars-track {
+  position: relative;
+  display: inline-flex;
+  font-size: 0.85rem;
+}
+
+.star--empty {
+  color: rgba(245, 158, 11, 0.2);
+}
+
+.stars-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  display: inline-flex;
+}
+
+.star--full {
+  color: var(--amber);
+}
+
+.star-value {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--amber);
+}
+
+.movie-card__votes {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* ── Genres ───────────────────────────────────────────────── */
+.movie-card__genres {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.genre-pill {
+  font-size: 0.7rem;
+  font-weight: 500;
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-full);
+  background: rgba(124, 106, 247, 0.12);
+  color: var(--primary-light);
+  border: 1px solid rgba(124, 106, 247, 0.2);
+  text-transform: capitalize;
+  letter-spacing: 0.01em;
+}
+
+/* ── Score Bars ───────────────────────────────────────────── */
+.movie-card__scores {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.score-bar-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 40px;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.score-bar-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-bar-track {
+  height: 5px;
+  background: var(--bg-surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.score-bar-fill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.score-bar-value {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .movie-card {
+    padding: var(--space-4);
+    gap: var(--space-3);
+  }
+
+  .movie-card__title {
+    white-space: normal;
+  }
+}

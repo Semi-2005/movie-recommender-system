@@ -1,0 +1,64 @@
+.stats-bar {
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  background: rgba(18, 18, 26, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.stats-bar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  padding: var(--space-4) var(--space-6);
+  flex-wrap: wrap;
+}
+
+.stats-bar__divider {
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.stat-item__icon {
+  color: var(--primary-light);
+  display: flex;
+  align-items: center;
+}
+
+.stat-item__value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.stat-item--highlight .stat-item__value {
+  background: linear-gradient(135deg, var(--primary-light), #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-item__label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+@media (max-width: 640px) {
+  .stats-bar__inner {
+    gap: var(--space-4);
+  }
+  .stats-bar__divider {
+    display: none;
+  }
+}
