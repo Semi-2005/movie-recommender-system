@@ -13,3 +13,7 @@ INFO:     127.0.0.1:55132 - "GET /stats HTTP/1.1" 200 OK
 INFO:     127.0.0.1:55134 - "GET /stats HTTP/1.1" 200 OK
 INFO:     127.0.0.1:55161 - "GET /recommend/hybrid?movie=Inception+%282010%29&top_n=12 HTTP/1.1" 200 OK
 INFO:     127.0.0.1:55162 - "GET /recommend/hybrid?movie=Inception+%282010%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55234 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55236 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55240 - "GET /recommend/hybrid?movie=The+Matrix+%281999%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55242 - "GET /recommend/hybrid?movie=The+Matrix+%281999%29&top_n=12 HTTP/1.1" 200 OK
