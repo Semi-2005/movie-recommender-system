@@ -18,7 +18,8 @@ ML-based movie recommendation system using content-based and collaborative filte
 ## How to run
 
 ### Backend
-pip install -r requirements.txt
+source .venv/bin/activate
+cd backend
 uvicorn backend.app.main:app --reload
 
 ## Data 
