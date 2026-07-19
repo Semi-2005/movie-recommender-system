@@ -16,7 +16,7 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from backend.app.models.content_based import recommender as cb_recommender
+from app.models.content_based import recommender as cb_recommender
 
 logger = logging.getLogger(__name__)
 
