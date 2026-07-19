@@ -4,7 +4,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Query
 
-from backend.app.services.recommender import (
+from app.services.recommender import (
     get_recommendations,
     get_collaborative_recommendations,
     get_hybrid_recommendations,

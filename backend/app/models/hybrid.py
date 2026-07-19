@@ -27,10 +27,10 @@ import logging
 import time
 from typing import Optional
 
-from backend.app.models.content_based import recommender as cb_recommender
-from backend.app.models.collaborative import collaborative_recommender as cf_recommender
-from backend.app.services.movie_identity import identity_bridge
-from backend.app.utils.score_utils import min_max_normalize, determine_alpha
+from app.models.content_based import recommender as cb_recommender
+from app.models.collaborative import collaborative_recommender as cf_recommender
+from app.services.movie_identity import identity_bridge
+from app.utils.score_utils import min_max_normalize, determine_alpha
 
 logger = logging.getLogger(__name__)
 

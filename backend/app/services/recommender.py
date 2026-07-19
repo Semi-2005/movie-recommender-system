@@ -1,8 +1,8 @@
 from typing import Optional
 
-from backend.app.models.content_based import recommender
-from backend.app.models.collaborative import collaborative_recommender
-from backend.app.models.hybrid import hybrid_recommender
+from app.models.content_based import recommender
+from app.models.collaborative import collaborative_recommender
+from app.models.hybrid import hybrid_recommender
 
 
 def get_recommendations(movie_name: str, top_n: int = 10):
