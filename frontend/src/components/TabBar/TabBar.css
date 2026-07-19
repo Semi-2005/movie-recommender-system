@@ -1,0 +1,68 @@
+.tab-bar {
+  display: flex;
+  gap: var(--space-2);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  width: fit-content;
+}
+
+.tab-bar__tab {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: var(--space-3) var(--space-5);
+  border-radius: var(--radius-md);
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast),
+    box-shadow var(--transition-fast);
+  color: var(--text-muted);
+  min-width: 120px;
+}
+
+.tab-bar__tab:hover {
+  background: var(--bg-surface-2);
+  color: var(--text-secondary);
+}
+
+.tab-bar__tab.is-active {
+  background: linear-gradient(135deg, rgba(124, 106, 247, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%);
+  color: var(--primary-light);
+  border: 1px solid rgba(124, 106, 247, 0.25);
+  box-shadow: 0 0 16px rgba(124, 106, 247, 0.15);
+}
+
+.tab-bar__label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-family: var(--font-display);
+}
+
+.tab-bar__desc {
+  font-size: 0.68rem;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.tab-bar__tab.is-active .tab-bar__desc {
+  opacity: 0.85;
+}
+
+@media (max-width: 640px) {
+  .tab-bar {
+    width: 100%;
+  }
+
+  .tab-bar__tab {
+    flex: 1;
+    min-width: unset;
+    padding: var(--space-3) var(--space-2);
+  }
+
+  .tab-bar__desc {
+    display: none;
+  }
+}

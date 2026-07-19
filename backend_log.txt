@@ -1,0 +1,15 @@
+INFO:     Started server process [16550]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:55097 - "GET /search?q=Toy HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55117 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55118 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55121 - "GET /recommend/hybrid?movie=Toy+Story+%281995%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55122 - "GET /recommend/hybrid?movie=Toy+Story+%281995%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55125 - "GET /recommend?movie=Toy+Story+%281995%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55128 - "GET /recommend/collaborative?movie=Toy+Story+%281995%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55132 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55134 - "GET /stats HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55161 - "GET /recommend/hybrid?movie=Inception+%282010%29&top_n=12 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55162 - "GET /recommend/hybrid?movie=Inception+%282010%29&top_n=12 HTTP/1.1" 200 OK
