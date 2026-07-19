@@ -25,5 +25,5 @@ uvicorn backend.app.main:app --reload
 movie_features.csv is generated from raw MovieLens datasets using notebooks/eda.ipynb
 
 ### Frontend
-npm install
-npm start
+cd frontend
+npm run dev
