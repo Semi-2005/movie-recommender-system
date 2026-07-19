@@ -9,12 +9,13 @@ def get_recommendations(movie_name: str, top_n: int = 10):
     return recommender.recommend(movie_name, top_n)
 
 
-def get_collaborative_recommendations(movie_id: int, top_n: int = 10):
+def get_collaborative_recommendations(movie_title: str, top_n: int = 10):
     """
     Return similar movies using item-based collaborative filtering.
-    Delegates to the pre-computed similarity matrix.
+    Accepts a movie title (with fuzzy matching support) and delegates
+    to the pre-computed similarity matrix.
     """
-    return collaborative_recommender.get_similar_movies(movie_id, top_n)
+    return collaborative_recommender.get_similar_movies(movie_title, top_n)
 
 
 def search_movies(query: str, limit: int = 10):
