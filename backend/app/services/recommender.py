@@ -1,5 +1,8 @@
+from typing import Optional
+
 from backend.app.models.content_based import recommender
 from backend.app.models.collaborative import collaborative_recommender
+from backend.app.models.hybrid import hybrid_recommender
 
 
 def get_recommendations(movie_name: str, top_n: int = 10):
@@ -16,6 +19,33 @@ def get_collaborative_recommendations(movie_title: str, top_n: int = 10):
     to the pre-computed similarity matrix.
     """
     return collaborative_recommender.get_similar_movies(movie_title, top_n)
+
+
+async def get_hybrid_recommendations(
+    movie_title: str,
+    top_n: int = 10,
+    alpha_override: Optional[float] = None,
+) -> dict:
+    """
+    Return hybrid recommendations by fusing content-based and
+    collaborative filtering outputs.
+
+    Uses adaptive weighted ensemble: the blending weight (alpha) is
+    determined per-request based on collaborative model confidence,
+    unless explicitly overridden via ``alpha_override``.
+
+    Args:
+        movie_title:    Movie title (fuzzy matching supported).
+        top_n:          Number of final recommendations.
+        alpha_override: Optional manual alpha for A/B testing [0, 1].
+
+    Returns:
+        A dict with fused recommendations, strategy metadata, and
+        performance metrics.
+    """
+    return await hybrid_recommender.recommend_async(
+        movie_title, top_n, alpha_override
+    )
 
 
 def search_movies(query: str, limit: int = 10):
