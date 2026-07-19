@@ -8,8 +8,12 @@ from backend.app.api.routes import router
 
 app = FastAPI(
     title="Movie Recommendation System",
-    description="ML-powered movie recommendation API using content-based filtering",
-    version="1.0.0"
+    description=(
+        "ML-powered movie recommendation API using content-based filtering, "
+        "item-based collaborative filtering, and an adaptive hybrid ensemble "
+        "that fuses both models for superior recommendation quality."
+    ),
+    version="2.0.0"
 )
 
 
