@@ -18,12 +18,13 @@ ML-based movie recommendation system using content-based and collaborative filte
 ## How to run
 
 ### Backend
-pip install -r requirements.txt
+source .venv/bin/activate
+cd backend
 uvicorn backend.app.main:app --reload
 
 ## Data 
 movie_features.csv is generated from raw MovieLens datasets using notebooks/eda.ipynb
 
 ### Frontend
-npm install
-npm start
+cd frontend
+npm run dev
