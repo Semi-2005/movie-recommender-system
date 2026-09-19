@@ -33,6 +33,11 @@ services:
       
       - key: PYTHONPATH
         value: /app
+
+      # PROJECT_ROOT: tells ML models where to find data/processed/
+      # /app is the WORKDIR in the Docker container.
+      - key: PROJECT_ROOT
+        value: /app
       
       # ARTIFACT_DIR: where the .npy file is stored (matches the Disk mount point)
       - key: ARTIFACT_DIR

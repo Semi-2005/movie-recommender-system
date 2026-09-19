@@ -18,6 +18,7 @@ identical to the pattern used by :mod:`content_based`.
 """
 
 import logging
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -29,9 +30,23 @@ from rapidfuzz import process, fuzz
 # ── Logging ──────────────────────────────────────────────────────────────
 logger = logging.getLogger(__name__)
 
-# ── Paths ────────────────────────────────────────────────────────────────
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-ARTIFACT_DIR = PROJECT_ROOT / "data" / "processed" / "collaborative_artifacts"
+# ── Paths ─────────────────────────────────────────────────────────────────
+# PROJECT_ROOT env var: set to /app in Docker (WORKDIR).
+# Falls back to parents[3] for local development where the file lives at:
+#   movie-recommender-system/backend/app/models/collaborative.py
+_root_env = os.getenv("PROJECT_ROOT")
+PROJECT_ROOT = Path(_root_env) if _root_env else Path(__file__).resolve().parents[3]
+
+# ARTIFACT_DIR env var: set to /data/collaborative_artifacts in Docker
+# so the mmap-ed .npy file is read from the Render Persistent Disk.
+# Falls back to the standard relative path for local development.
+_artifact_env = os.getenv("ARTIFACT_DIR")
+ARTIFACT_DIR = (
+    Path(_artifact_env)
+    if _artifact_env
+    else PROJECT_ROOT / "data" / "processed" / "collaborative_artifacts"
+)
+
 MOVIE_FEATURES_PATH = PROJECT_ROOT / "data" / "processed" / "movie_features.csv"
 
 # Artifact filenames

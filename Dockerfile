@@ -67,6 +67,9 @@ USER appuser
 # Render injects PORT env var; default to 8000 for local runs
 ENV PORT=8000
 ENV PYTHONPATH=/app
+# PROJECT_ROOT tells the ML models where to find data/ directory.
+# Without this, parents[3] resolves to / instead of /app in the container.
+ENV PROJECT_ROOT=/app
 
 EXPOSE 8000
 

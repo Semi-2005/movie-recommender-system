@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from typing import Optional
 
@@ -28,8 +29,15 @@ class ContentBasedRecommender:
         self._build_tfidf_matrix()
 
     def _load_data(self):
-        """Load processed CSV dataset."""
-        project_root = Path(__file__).resolve().parents[3]
+        """Load processed CSV dataset.
+
+        Supports PROJECT_ROOT env variable for Docker/production deployments
+        where the directory depth differs from local development.
+        """
+        # PROJECT_ROOT env var is set in Docker (e.g. /app).
+        # Falls back to parents[3] for local development.
+        _root_env = os.getenv("PROJECT_ROOT")
+        project_root = Path(_root_env) if _root_env else Path(__file__).resolve().parents[3]
         file_path = project_root / "data" / "processed" / "movie_features.csv"
 
         if not file_path.exists():
