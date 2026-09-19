@@ -58,9 +58,14 @@ Thumbs.db
 
 # ML Models (if generated)
 *.pkl
-*.joblib
 *.h5
 *.hdf5
+# Large joblib artifacts — excluded from git (too big)
+*.joblib
+# Exception: index mapping is tiny (~200 KB) and required at Docker build time
+!data/processed/collaborative_artifacts/movie_index_mapping.joblib
+# Large NumPy binary — stored on Render Persistent Disk, not in git
+*.npy
 
 # Coverage reports
 htmlcov/
@@ -77,7 +82,8 @@ data/link.csv
 data/movie.csv
 data/rating.csv
 data/processed/collabrative_features.csv
-data/processed/collaborative_artifacts/
+data/processed/collaborative_artifacts/item_similarity_matrix.joblib
+data/processed/collaborative_artifacts/item_similarity_matrix.npy
 
 # pytest
 .pytest_cache/
