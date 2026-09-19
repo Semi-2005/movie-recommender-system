@@ -23,7 +23,7 @@ app = FastAPI(
 # In production: set FRONTEND_URL env var to your Vercel deployment URL
 #   e.g. https://cinematch.vercel.app
 # In local development: falls back to localhost origins automatically.
-_frontend_url = os.getenv("FRONTEND_URL", "")
+_frontend_url = os.getenv("FRONTEND_URL", "").rstrip("/")
 
 _allowed_origins: list[str] = [
     "http://localhost:5173",   # Vite dev server
