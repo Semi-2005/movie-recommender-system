@@ -40,11 +40,14 @@ if [ ! -f "${SIM_MATRIX_FILE}" ]; then
     echo "📥 Similarity matrix not found. Downloading from: ${SIM_MATRIX_URL}"
     echo "   This may take a few minutes depending on file size (~1.5-2 GB)..."
 
-    # Use wget with progress for large file download
-    wget --progress=bar:force \
-         --tries=3 \
-         --timeout=300 \
-         -O "${SIM_MATRIX_FILE}" \
+    # curl -L: follow redirects (required for Hugging Face → CDN redirects)
+    # --retry 3: retry on failure
+    # -o: output file
+    curl -L \
+         --retry 3 \
+         --retry-delay 5 \
+         --progress-bar \
+         -o "${SIM_MATRIX_FILE}" \
          "${SIM_MATRIX_URL}"
 
     echo "✅ Download complete: ${SIM_MATRIX_FILE}"
