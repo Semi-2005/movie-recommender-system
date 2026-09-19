@@ -1,0 +1,42 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# .dockerignore — Files excluded from the Docker build context
+#
+# Keep the build context small to speed up docker build and pushes.
+# Large ML artifacts are handled separately (Persistent Disk / cloud storage).
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Python ────────────────────────────────────────────────────────────────────
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/.pytest_cache
+**/.venv
+**/venv
+**/.mypy_cache
+**/.ruff_cache
+
+# ── Large ML artifacts (NOT baked into the image) ────────────────────────────
+# The similarity matrix is mounted from a Persistent Disk at /data
+data/processed/collaborative_artifacts/item_similarity_matrix.npy
+data/processed/collaborative_artifacts/item_similarity_matrix.joblib
+data/processed/collabrative_features.csv
+
+# ── Frontend (deployed to Vercel separately) ──────────────────────────────────
+frontend/
+
+# ── Notebooks & dev tools ─────────────────────────────────────────────────────
+notebooks/
+tests/
+**/.idea
+**/.junie
+**/.DS_Store
+
+# ── Git ───────────────────────────────────────────────────────────────────────
+.git
+.gitignore
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+backend_log.txt

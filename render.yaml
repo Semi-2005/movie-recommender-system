@@ -1,0 +1,58 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# render.yaml — Render Infrastructure-as-Code Configuration
+#
+# Deploys: CineMatch FastAPI Backend as a Web Service
+#
+# Frontend is already deployed on Vercel separately.
+#
+# Docs: https://render.com/docs/blueprint-spec
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+  # ── Backend: FastAPI (Python) ───────────────────────────────────────────────
+  - type: web
+    name: cinematch-backend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    
+    # Render region — choose closest to your users
+    region: frankfurt  # EU region; change to "oregon" for US
+    
+    # Plan: starter = 512MB RAM, 0.5 CPU ($7/mo)
+    # With mmap optimization, 512MB is sufficient for this app.
+    # Upgrade to "standard" ($25/mo, 2GB RAM) if you need more headroom.
+    plan: starter
+    
+    # Health check endpoint (uses our /ping route)
+    healthCheckPath: /ping
+    
+    # ── Environment Variables ─────────────────────────────────────────────────
+    envVars:
+      - key: PORT
+        value: 8000
+      
+      - key: PYTHONPATH
+        value: /app
+      
+      # ARTIFACT_DIR: where the .npy file is stored (matches the Disk mount point)
+      - key: ARTIFACT_DIR
+        value: /data/collaborative_artifacts
+      
+      # SIM_MATRIX_URL: set this in Render dashboard after uploading to cloud storage
+      # Leave empty if using Render Persistent Disk (file will be pre-uploaded there)
+      - key: SIM_MATRIX_URL
+        sync: false  # Set manually in Render dashboard for security
+      
+      # CORS: allow requests from your Vercel frontend
+      # Update this to your actual Vercel URL after deployment
+      - key: FRONTEND_URL
+        value: https://your-project.vercel.app  # ← UPDATE THIS
+
+    # ── Persistent Disk ───────────────────────────────────────────────────────
+    # Mounts a persistent volume at /data.
+    # Upload item_similarity_matrix.npy here once via Render Shell.
+    # Cost: $0.25/GB/month → ~$0.50-0.75/mo for a 2-3 GB .npy file.
+    disk:
+      name: cinematch-ml-artifacts
+      mountPath: /data
+      sizeGB: 5  # 5 GB is enough for the .npy file with room to grow
