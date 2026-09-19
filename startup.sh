@@ -27,7 +27,29 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 # ── Step 1: Ensure artifact directory exists ──────────────────────────────────
 mkdir -p "${ARTIFACT_DIR}"
 
-# ── Step 2: Download similarity matrix if not present ────────────────────────
+# ── Step 2: Copy index mapping from Docker image (first startup only) ─────────
+# movie_index_mapping.joblib is baked into the Docker image at:
+#   /app/data/processed/collaborative_artifacts/movie_index_mapping.joblib
+# But ARTIFACT_DIR points to the Persistent Disk (/data/collaborative_artifacts).
+# On first startup, copy it there so the Python code finds it.
+IMAGE_JOBLIB="/app/data/processed/collaborative_artifacts/movie_index_mapping.joblib"
+DISK_JOBLIB="${ARTIFACT_DIR}/movie_index_mapping.joblib"
+
+if [ ! -f "${DISK_JOBLIB}" ]; then
+    if [ -f "${IMAGE_JOBLIB}" ]; then
+        echo "📋 Copying movie_index_mapping.joblib to artifact directory..."
+        cp "${IMAGE_JOBLIB}" "${DISK_JOBLIB}"
+        echo "✅ Copied: ${DISK_JOBLIB}"
+    else
+        echo "❌ ERROR: movie_index_mapping.joblib not found in Docker image at ${IMAGE_JOBLIB}"
+        echo "   Rebuild the Docker image to include this file."
+        exit 1
+    fi
+else
+    echo "✅ Index mapping found: ${DISK_JOBLIB}"
+fi
+
+# ── Step 3: Download similarity matrix if not present ────────────────────────
 if [ ! -f "${SIM_MATRIX_FILE}" ]; then
     if [ -z "${SIM_MATRIX_URL:-}" ]; then
         echo "❌ ERROR: item_similarity_matrix.npy not found and SIM_MATRIX_URL is not set."
@@ -38,7 +60,7 @@ if [ ! -f "${SIM_MATRIX_FILE}" ]; then
     fi
 
     echo "📥 Similarity matrix not found. Downloading from: ${SIM_MATRIX_URL}"
-    echo "   This may take a few minutes depending on file size (~1.5-2 GB)..."
+    echo "   This may take a few minutes depending on file size (~2-3 GB)..."
 
     # curl -L: follow redirects (required for Hugging Face → CDN redirects)
     # --retry 3: retry on failure
