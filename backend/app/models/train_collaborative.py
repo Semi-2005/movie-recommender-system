@@ -10,8 +10,16 @@ Usage:
     python -m backend.app.models.train_collaborative
 
 Artifacts produced (in ``data/processed/collaborative_artifacts/``):
-    - ``item_similarity_matrix.joblib``  — dense float32 cosine-similarity matrix
-    - ``movie_index_mapping.joblib``     — bidirectional movieId ↔ matrix-row mapping
+    - ``item_similarity_matrix.npy``    — dense float32 cosine-similarity matrix
+                                          saved in NumPy binary format (UNCOMPRESSED).
+                                          This format supports ``np.load(mmap_mode='r')``
+                                          which lets the OS load only the accessed rows
+                                          on demand, keeping RAM usage near-zero.
+    - ``movie_index_mapping.joblib``    — bidirectional movieId ↔ matrix-row mapping
+
+NOTE: The similarity matrix is intentionally saved WITHOUT compression.
+      Compressed joblib files are incompatible with mmap_mode, so we trade
+      ~50% extra disk space for dramatically lower runtime RAM usage.
 """
 
 import time
@@ -152,19 +160,34 @@ def save_artifacts(
     output_dir: Path,
 ) -> None:
     """
-    Serialize the similarity matrix and index mapping to disk using joblib.
+    Serialize the similarity matrix and index mapping to disk.
 
-    ``compress=3`` gives a good balance between file size and
-    serialization speed.
+    Similarity matrix → NumPy ``.npy`` (UNCOMPRESSED)
+    ─────────────────────────────────────────────────────
+    We deliberately avoid compression here.  ``joblib.dump`` with any
+    ``compress`` level produces a zlib stream that is incompatible with
+    memory-mapping (``mmap_mode``).  By saving as a raw ``.npy`` file we
+    allow the runtime to call ``np.load(path, mmap_mode='r')``, which
+    instructs the OS to map the file into the virtual address space and
+    load only the accessed rows on demand — keeping per-request RAM usage
+    near-zero instead of allocating the full ~1–2 GB at startup.
+
+    Trade-off: the ``.npy`` file is larger on disk (≈ 1.5–2× the
+    compressed version), but this is the correct trade-off for a
+    memory-constrained production environment.
+
+    Index mapping → joblib (compressed, small file ≤ 1 MB)
     """
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    sim_path = output_dir / "item_similarity_matrix.joblib"
+    # ── Similarity matrix: uncompressed NumPy binary (.npy) ─────────────
+    sim_path = output_dir / "item_similarity_matrix.npy"
     map_path = output_dir / "movie_index_mapping.joblib"
 
-    logger.info("Saving similarity matrix to %s …", sim_path)
-    joblib.dump(similarity, sim_path, compress=3)
+    logger.info("Saving similarity matrix (uncompressed .npy) to %s …", sim_path)
+    np.save(sim_path, similarity)  # mmap-compatible: no compression
 
+    # ── Index mapping: compressed joblib (tiny file, no mmap needed) ────
     logger.info("Saving index mapping to %s …", map_path)
     joblib.dump(mapping, map_path, compress=3)
 
@@ -172,7 +195,7 @@ def save_artifacts(
     sim_size = sim_path.stat().st_size / (1024 ** 2)
     map_size = map_path.stat().st_size / (1024 ** 2)
     logger.info(
-        "Artifacts saved — similarity: %.1f MB, mapping: %.2f MB",
+        "Artifacts saved — similarity: %.1f MB (uncompressed .npy), mapping: %.2f MB",
         sim_size,
         map_size,
     )

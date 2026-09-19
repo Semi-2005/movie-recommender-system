@@ -6,6 +6,12 @@ Loads pre-computed artifacts (similarity matrix + index mapping) produced
 by :mod:`train_collaborative` and exposes a ``get_similar_movies`` function
 for the API layer.
 
+The similarity matrix is loaded with ``np.load(mmap_mode='r')``: the OS
+maps the ``.npy`` file into the process's virtual address space and pulls
+individual rows from disk on demand.  This keeps startup RAM near-zero
+(≈ tens of MB) regardless of the matrix's full size (≥1 GB), because
+only the single row accessed per request is ever materialised in RAM.
+
 The module-level singleton ``collaborative_recommender`` is instantiated at
 import time so the FastAPI application pays the cost once during startup,
 identical to the pattern used by :mod:`content_based`.
@@ -27,6 +33,10 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 ARTIFACT_DIR = PROJECT_ROOT / "data" / "processed" / "collaborative_artifacts"
 MOVIE_FEATURES_PATH = PROJECT_ROOT / "data" / "processed" / "movie_features.csv"
+
+# Artifact filenames
+SIM_MATRIX_PATH = ARTIFACT_DIR / "item_similarity_matrix.npy"   # mmap-compatible
+MOVIE_MAPPING_PATH = ARTIFACT_DIR / "movie_index_mapping.joblib"
 
 
 class CollaborativeRecommender:
@@ -60,32 +70,41 @@ class CollaborativeRecommender:
         Load the pre-computed similarity matrix, index mapping, and
         movie metadata into memory.
 
+        The similarity matrix is opened with ``np.load(mmap_mode='r')``:
+        the OS memory-maps the ``.npy`` file, meaning the full matrix is
+        **NOT** loaded into RAM at startup.  Only the single row that is
+        accessed per request (``self.similarity_matrix[idx]``) is paged
+        in from disk on demand.  This reduces startup RAM from ~1.5 GB
+        down to a few MB for the matrix itself.
+
         Raises:
             FileNotFoundError: If any required artifact is missing.
                                Run ``train_collaborative.py`` first.
         """
-        sim_path = ARTIFACT_DIR / "item_similarity_matrix.joblib"
-        map_path = ARTIFACT_DIR / "movie_index_mapping.joblib"
-
-        if not sim_path.exists() or not map_path.exists():
+        if not SIM_MATRIX_PATH.exists() or not MOVIE_MAPPING_PATH.exists():
             raise FileNotFoundError(
                 "Collaborative filtering artifacts not found. "
-                f"Expected files in {ARTIFACT_DIR}/. "
+                f"Expected:\n"
+                f"  • {SIM_MATRIX_PATH}\n"
+                f"  • {MOVIE_MAPPING_PATH}\n"
                 "Run `python -m backend.app.models.train_collaborative` first."
             )
 
-        logger.info("Loading collaborative filtering artifacts …")
+        logger.info("Memory-mapping similarity matrix from %s …", SIM_MATRIX_PATH)
 
-        self.similarity_matrix = joblib.load(sim_path)
-        mapping = joblib.load(map_path)
+        # mmap_mode='r' → read-only memory map: the OS loads rows on demand
+        # from the .npy file instead of reading the whole file into RAM.
+        # Thread-safe in read-only mode; compatible with asyncio.to_thread().
+        self.similarity_matrix = np.load(SIM_MATRIX_PATH, mmap_mode="r")
 
+        mapping = joblib.load(MOVIE_MAPPING_PATH)
         self.movie_id_to_idx = mapping["movie_id_to_idx"]
         self.idx_to_movie_id = mapping["idx_to_movie_id"]
 
         logger.info(
-            "Loaded similarity matrix %s (%.1f MB) — %d movies indexed",
+            "Memory-mapped similarity matrix %s (%.1f MB on disk) — %d movies indexed",
             self.similarity_matrix.shape,
-            self.similarity_matrix.nbytes / (1024 ** 2),
+            SIM_MATRIX_PATH.stat().st_size / (1024 ** 2),
             len(self.movie_id_to_idx),
         )
 
@@ -348,6 +367,7 @@ class CollaborativeRecommender:
                 if self.similarity_matrix is not None
                 else None
             ),
+            "load_mode": "memory-mapped (mmap_mode='r') — rows loaded on demand",
             "metadata_loaded": self.movie_metadata is not None,
         }
 
