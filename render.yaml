@@ -51,7 +51,7 @@ services:
       # CORS: allow requests from your Vercel frontend
       # Update this to your actual Vercel URL after deployment
       - key: FRONTEND_URL
-        value: https://your-project.vercel.app  # ← UPDATE THIS
+        value: https://movie-recommender-system-skd1.vercel.app  # ← UPDATED
 
     # ── Persistent Disk ───────────────────────────────────────────────────────
     # Mounts a persistent volume at /data.
